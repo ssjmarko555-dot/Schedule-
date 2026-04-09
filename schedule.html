@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Хуваарь">
+<meta name="theme-color" content="#7f5af0">
+<link rel="manifest" href="manifest.json">
+<title>Хичээлийн Хуваарь 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a12;--card:#111120;--border:#1a1a2e;
+  --p:#7f5af0;--g:#2cb67d;--o:#ff8c42;
+  --text:#f0f0ff;--muted:#7a7a9a;
+  --glow-p:rgba(127,90,240,.25);
+  --glow-g:rgba(44,182,125,.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom,20px);
+}
+
+/* ── ANIMATED BACKGROUND ── */
+.bg-canvas{
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+}
+.orb{
+  position:absolute;border-radius:50%;filter:blur(80px);
+  animation:orbFloat linear infinite;
+}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(127,90,240,.18),transparent 70%);top:-100px;left:-150px;animation-duration:18s;animation-delay:0s;}
+.orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(44,182,125,.14),transparent 70%);bottom:-80px;right:-100px;animation-duration:22s;animation-delay:-8s;}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(255,140,66,.10),transparent 70%);top:40%;left:50%;animation-duration:26s;animation-delay:-14s;}
+
+@keyframes orbFloat{
+  0%  {transform:translate(0,0) scale(1);}
+  25% {transform:translate(40px,-30px) scale(1.05);}
+  50% {transform:translate(-20px,50px) scale(.95);}
+  75% {transform:translate(60px,20px) scale(1.08);}
+  100%{transform:translate(0,0) scale(1);}
+}
+
+/* ── GRID SHIMMER LINES ── */
+.grid-lines{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(127,90,240,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(127,90,240,.03) 1px,transparent 1px);
+  background-size:60px 60px;
+  animation:gridPan 40s linear infinite;
+}
+@keyframes gridPan{from{background-position:0 0}to{background-position:60px 60px}}
+
+.wrapper{max-width:960px;margin:0 auto;position:relative;z-index:1;padding:28px 14px 40px;}
+
+/* ── INSTALL BANNER ── */
+#install-banner{
+  display:none;align-items:center;gap:10px;
+  background:linear-gradient(135deg,rgba(127,90,240,.15),rgba(44,182,125,.10));
+  border:1px solid rgba(127,90,240,.35);border-radius:12px;
+  padding:12px 16px;margin-bottom:18px;
+  animation:fadeDown .4s ease both;
+}
+#install-banner.show{display:flex;}
+.ib-icon{font-size:1.5rem;flex-shrink:0;}
+.ib-text{flex:1;}
+.ib-title{font-size:.8rem;font-weight:700;color:var(--text);}
+.ib-sub{font-size:.67rem;color:var(--muted);font-family:'Space Mono',monospace;}
+.ib-btn{background:var(--p);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-family:'Space Mono',monospace;font-size:.66rem;cursor:pointer;flex-shrink:0;}
+.ib-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;flex-shrink:0;}
+#ios-hint{display:none;background:rgba(127,90,240,.1);border:1px solid rgba(127,90,240,.28);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.72rem;color:var(--muted);line-height:1.6;animation:fadeDown .4s ease both;}
+#ios-hint.show{display:block;}
+#ios-hint strong{color:var(--text);}
+.ih-close{float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:12px;animation:fadeDown .7s ease both;}
+.sem-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(127,90,240,.12);border:1px solid rgba(127,90,240,.35);
+  color:#c4b5fd;font-family:'Space Mono',monospace;font-size:.68rem;
+  padding:5px 16px;border-radius:30px;letter-spacing:.12em;margin-bottom:10px;
+  position:relative;overflow:hidden;
+}
+.sem-badge::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  transform:translateX(-100%);animation:shimmer 3s ease infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+
+header h1{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.8rem,5.5vw,3rem);
+  background:linear-gradient(135deg,#e8e8ff 0%,#a78bfa 50%,#6ee7b7 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:5px;
+  animation:gradientShift 6s ease infinite;
+  background-size:200% 200%;
+}
+@keyframes gradientShift{
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+header p{color:var(--muted);font-size:.72rem;font-family:'Space Mono',monospace;letter-spacing:.12em;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:14px;justify-content:center;margin:18px 0 22px;flex-wrap:wrap;animation:fadeUp .6s .2s ease both;}
+.li{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--muted);font-family:'Space Mono',monospace;}
+.ld{width:8px;height:8px;border-radius:50%;}
+.ld-p{background:var(--p);box-shadow:0 0 8px var(--p);}
+.ld-g{background:var(--g);box-shadow:0 0 8px var(--g);}
+.ld-e{background:#1a1a2e;border:1px solid #333;}
+.ld-o{background:var(--o);box-shadow:0 0 8px var(--o);}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:54px repeat(5,1fr);gap:6px;}
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.ph-num{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--muted);}
+.ph-time{font-family:'Space Mono',monospace;font-size:.5rem;color:#3a3a5a;text-align:center;line-height:1.5;}
+.dh{
+  text-align:center;padding:11px 5px;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  font-family:'DM Serif Display',serif;font-size:.9rem;
+  animation:fadeDown .5s ease both;
+  transition:border-color .3s;
+}
+.dh:hover{border-color:rgba(127,90,240,.3);}
+.dh span{display:block;font-family:'Space Mono',monospace;font-size:.53rem;color:var(--muted);margin-top:2px;letter-spacing:.14em;}
+
+/* ── CELL ── */
+.cell{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:9px 9px 7px;min-height:82px;display:flex;flex-direction:column;
+  justify-content:space-between;gap:4px;position:relative;cursor:pointer;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, border-color .2s;
+  animation:fadeUp .5s ease both;
+  overflow:hidden;
+}
+.cell::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),transparent);
+  transition:opacity .2s;
+}
+.cell:hover::before{opacity:1;}
+.cell:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 14px 32px rgba(0,0,0,.5);}
+.cell:active{transform:scale(.97);}
+
+.cell.req{border-color:rgba(127,90,240,.3);background:linear-gradient(145deg,#111120 50%,rgba(127,90,240,.1) 100%);}
+.cell.req:hover{border-color:var(--p);box-shadow:0 14px 32px var(--glow-p);}
+.cell.ele{border-color:rgba(44,182,125,.25);background:linear-gradient(145deg,#111120 50%,rgba(44,182,125,.08) 100%);}
+.cell.ele:hover{border-color:var(--g);box-shadow:0 14px 32px var(--glow-g);}
+.cell.emp{opacity:.22;cursor:default;pointer-events:none;}
+.cell.has-note::after{content:'✎';position:absolute;top:6px;right:7px;font-size:.65rem;color:var(--o);animation:notePulse 2s ease infinite;}
+@keyframes notePulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* pulse ring on hover for active cells */
+.cell.req:hover::after,.cell.ele:hover::after{
+  content:'';position:absolute;inset:-1px;border-radius:10px;
+  border:1px solid currentColor;opacity:.4;
+  animation:ringPulse .8s ease infinite;
+}
+.cell.req:hover::after{color:var(--p);}
+.cell.ele:hover::after{color:var(--g);}
+.cell.has-note:hover::after{content:'✎';animation:notePulse 2s ease infinite;border:none;inset:auto;top:6px;right:7px;}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.02);opacity:.1}}
+
+.cn{font-size:.72rem;line-height:1.45;color:var(--text);}
+.ct{display:inline-block;font-family:'Space Mono',monospace;font-size:.54rem;padding:2px 6px;border-radius:20px;letter-spacing:.06em;width:fit-content;margin-top:3px;}
+.tr{background:rgba(127,90,240,.18);color:#a78bfa;border:1px solid rgba(127,90,240,.3);}
+.te{background:rgba(44,182,125,.15);color:#6ee7b7;border:1px solid rgba(44,182,125,.3);}
+.np{font-size:.61rem;color:var(--o);line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;border-top:1px solid rgba(255,140,66,.18);padding-top:4px;margin-top:3px;}
+
+/* ── STATS ── */
+.stats{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .35s ease both;}
+.stat{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:11px 22px;text-align:center;
+  transition:transform .2s,box-shadow .2s;cursor:default;
+}
+.stat:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+.sn{font-family:'DM Serif Display',serif;font-size:1.7rem;}
+.sl{font-size:.62rem;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+.sw{color:var(--text);} .sp{color:#a78bfa;} .sg{color:#6ee7b7;}
+
+/* ── MODAL (bottom sheet) ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(10px);z-index:200;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{
+  background:linear-gradient(160deg,#15152a,#111120);
+  border:1px solid rgba(127,90,240,.3);
+  border-radius:20px 20px 0 0;padding:24px 22px;
+  width:100%;max-width:500px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -12px 50px rgba(127,90,240,.15);
+  animation:slideUp .28s cubic-bezier(.34,1.2,.64,1) both;
+  position:relative;overflow:hidden;
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:8px;
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;margin-top:12px;}
+.mt{font-family:'DM Serif Display',serif;font-size:1.12rem;line-height:1.35;}
+.mc{background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--muted);font-size:1rem;cursor:pointer;padding:4px 8px;line-height:1;border-radius:6px;flex-shrink:0;transition:background .2s;}
+.mc:hover{background:rgba(255,255,255,.14);color:var(--text);}
+.mm{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;}
+.mtag{font-family:'Space Mono',monospace;font-size:.61rem;padding:3px 10px;border-radius:20px;letter-spacing:.07em;}
+.mday{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border);}
+.mtime{background:rgba(255,140,66,.1);color:#ffb085;border:1px solid rgba(255,140,66,.22);}
+.modal label{display:block;font-family:'Space Mono',monospace;font-size:.64rem;color:var(--muted);letter-spacing:.1em;margin-bottom:7px;}
+.modal textarea{
+  width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:'Noto Sans JP',sans-serif;
+  font-size:.82rem;padding:11px;resize:none;height:105px;outline:none;
+  transition:border-color .2s,box-shadow .2s;line-height:1.65;
+}
+.modal textarea:focus{border-color:rgba(127,90,240,.55);box-shadow:0 0 0 3px rgba(127,90,240,.1);}
+.modal textarea::placeholder{color:#2a2a45;}
+.ma{display:flex;gap:8px;margin-top:12px;justify-content:flex-end;}
+.btn{font-family:'Space Mono',monospace;font-size:.68rem;padding:9px 16px;border-radius:9px;cursor:pointer;letter-spacing:.05em;border:none;transition:all .2s;}
+.bs{background:var(--p);color:#fff;box-shadow:0 4px 14px rgba(127,90,240,.35);}
+.bs:hover{background:#9070ff;transform:translateY(-1px);}
+.bd{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border);}
+.bd:hover{background:rgba(255,255,255,.12);color:var(--text);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:560px){
+  .grid{grid-template-columns:44px repeat(5,1fr);gap:4px;}
+  .cell{min-height:66px;padding:7px 6px;}
+  .cn{font-size:.63rem;}
+  .ct{font-size:.49rem;}
+  .dh{font-size:.78rem;padding:9px 3px;}
+  .ph-time{font-size:.44rem;}
+}
+@media(max-width:400px){
+  .grid{grid-template-columns:38px repeat(5,1fr);gap:3px;}
+  .cell{min-height:58px;padding:6px 5px;}
+  .cn{font-size:.58rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-canvas">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<div class="grid-lines"></div>
+
+<div class="wrapper">
+
+  <div id="install-banner">
+    <div class="ib-icon">📲</div>
+    <div class="ib-text">
+      <div class="ib-title">Утсандаа суулгах</div>
+      <div class="ib-sub">App шиг нээж хэрэглэх</div>
+    </div>
+    <button class="ib-btn" id="ib-install">Суулгах</button>
+    <button class="ib-close" id="ib-close">✕</button>
+  </div>
+  <div id="ios-hint">
+    <button class="ih-close" id="ih-close">✕</button>
+    <strong>📲 iPhone дээр суулгах:</strong><br>
+    Safari доод талын <strong>□↑ Share</strong> → <strong>"Add to Home Screen"</strong> дарна уу.
+  </div>
+
+  <header>
+    <div class="sem-badge">🌸 2026 · ХАВРЫН СЕМЕСТР</div>
+    <h1>Хичээлийн Хуваарь</h1>
+    <p>SPRING SEMESTER · ACADEMIC SCHEDULE</p>
+  </header>
+
+  <div class="legend">
+    <div class="li"><div class="ld ld-p"></div>Заавал</div>
+    <div class="li"><div class="ld ld-g"></div>Сонгон</div>
+    <div class="li"><div class="ld ld-e"></div>Чөлөөт</div>
+    <div class="li"><div class="ld ld-o"></div>Тэмдэглэл</div>
+  </div>
+
+  <div class="grid">
+    <!-- headers -->
+    <div></div>
+    <div class="dh" style="animation-delay:.05s">Даваа<span>MON</span></div>
+    <div class="dh" style="animation-delay:.1s">Мягмар<span>TUE</span></div>
+    <div class="dh" style="animation-delay:.15s">Лхагва<span>WED</span></div>
+    <div class="dh" style="animation-delay:.2s">Пүрэв<span>THU</span></div>
+    <div class="dh" style="animation-delay:.25s">Баасан<span>FRI</span></div>
+
+    <!-- ① 9:00–10:30 -->
+    <div class="ph"><span class="ph-num">①</span><span class="ph-time">9:00<br>10:30</span></div>
+    <div class="cell emp" style="animation-delay:.08s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <!-- Мягмар ①: ХАСАГДСАН -->
+    <div class="cell emp" style="animation-delay:.12s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <div class="cell req" data-id="wed1" data-name="English" data-day="Лхагва" data-type="req" data-time="9:00–10:30" style="animation-delay:.16s">
+      <div><div class="cn">English</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell ele" data-id="thu1" data-name="Японы соёлын тухай" data-day="Пүрэв" data-type="ele" data-time="9:00–10:30" style="animation-delay:.2s">
+      <div><div class="cn">Японы соёлын тухай</div><span class="ct te">сонгон</span></div>
+    </div>
+    <div class="cell req" data-id="fri1" data-name="English" data-day="Баасан" data-type="req" data-time="9:00–10:30" style="animation-delay:.24s">
+      <div><div class="cn">English</div><span class="ct tr">заавал</span></div>
+    </div>
+
+    <!-- ② 10:40–12:10 -->
+    <div class="ph"><span class="ph-num">②</span><span class="ph-time">10:40<br>12:10</span></div>
+    <div class="cell emp" style="animation-delay:.1s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <div class="cell req" data-id="tue2" data-name="Компьютерийн суурь мэдлэг A④" data-day="Мягмар" data-type="req" data-time="10:40–12:10" style="animation-delay:.14s">
+      <div><div class="cn">Компьютерийн суурь мэдлэг A④</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell ele" data-id="wed2" data-name="Иргэний хууль + өдөр тутмын амьдрал" data-day="Лхагва" data-type="ele" data-time="10:40–12:10" style="animation-delay:.18s">
+      <div><div class="cn">Иргэний хууль + өдөр тутмын амьдрал</div><span class="ct te">сонгон</span></div>
+    </div>
+    <div class="cell req" data-id="thu2" data-name="Seminar" data-day="Пүрэв" data-type="req" data-time="10:40–12:10" style="animation-delay:.22s">
+      <div><div class="cn">Seminar</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell ele" data-id="fri2" data-name="Нийгмийн шинжлэх ухааны суурь" data-day="Баасан" data-type="ele" data-time="10:40–12:10" style="animation-delay:.26s">
+      <div><div class="cn">Нийгмийн шинжлэх ухааны суурь</div><span class="ct te">сонгон</span></div>
+    </div>
+
+    <!-- ③ 12:50–14:20 -->
+    <div class="ph"><span class="ph-num">③</span><span class="ph-time">12:50<br>14:20</span></div>
+    <div class="cell req" data-id="mon3" data-name="Communication" data-day="Даваа" data-type="req" data-time="12:50–14:20" style="animation-delay:.12s">
+      <div><div class="cn">Communication</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell ele" data-id="tue3" data-name="Японы тухай оршил (гадаад оюутнуудад)" data-day="Мягмар" data-type="ele" data-time="12:50–14:20" style="animation-delay:.16s">
+      <div><div class="cn">Японы тухай оршил (гадаад оюутнуудад)</div><span class="ct te">сонгон</span></div>
+    </div>
+    <div class="cell req" data-id="wed3" data-name="Нягтлан бодохын үндэс" data-day="Лхагва" data-type="req" data-time="12:50–14:20" style="animation-delay:.2s">
+      <div><div class="cn">Нягтлан бодохын үндэс</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell emp" style="animation-delay:.24s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <div class="cell req" data-id="fri3" data-name="Эдийн засгийн үндэс" data-day="Баасан" data-type="req" data-time="12:50–14:20" style="animation-delay:.28s">
+      <div><div class="cn">Эдийн засгийн үндэс</div><span class="ct tr">заавал</span></div>
+    </div>
+
+    <!-- ④ 14:30–16:00 -->
+    <div class="ph"><span class="ph-num">④</span><span class="ph-time">14:30<br>16:00</span></div>
+    <div class="cell req" data-id="mon4" data-name="Japanese Language" data-day="Даваа" data-type="req" data-time="14:30–16:00" style="animation-delay:.14s">
+      <div><div class="cn">Japanese Language</div><span class="ct tr">заавал</span></div>
+    </div>
+    <div class="cell emp" style="animation-delay:.18s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <div class="cell ele" data-id="wed4" data-name="IT Passport шалгалтад бэлдэх практик" data-day="Лхагва" data-type="ele" data-time="14:30–16:00" style="animation-delay:.22s">
+      <div><div class="cn">IT Passport шалгалтад бэлдэх практик</div><span class="ct te">сонгон</span></div>
+    </div>
+    <!-- Пүрэв ④: ХАСАГДСАН -->
+    <div class="cell emp" style="animation-delay:.26s"><div class="cn" style="color:#1e1e35">—</div></div>
+    <div class="cell ele" data-id="fri4" data-name="Statistics" data-day="Баасан" data-type="ele" data-time="14:30–16:00" style="animation-delay:.3s">
+      <div><div class="cn">Statistics</div><span class="ct te">сонгон</span></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="sn sw">12</div><div class="sl">НИЙТ ХИЧЭЭЛ</div></div>
+    <div class="stat"><div class="sn sp">6</div><div class="sl">ЗААВАЛ</div></div>
+    <div class="stat"><div class="sn sg">6</div><div class="sl">СОНГОН</div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="mh">
+      <div class="mt" id="m-title"></div>
+      <button class="mc" id="m-close">✕</button>
+    </div>
+    <div class="mm" id="m-meta"></div>
+    <label>✎ &nbsp;ТЭМДЭГЛЭЛ · НЭМЭЛТ МЭДЭЭЛЭЛ</label>
+    <textarea id="m-note" placeholder="Жишээ нь: 3-р байр 201 анги · Багш Yamamoto · Даалгавар 7 хоногт нэг удаа..."></textarea>
+    <div class="ma">
+      <button class="btn bd" id="m-clear">Устгах</button>
+      <button class="btn bs" id="m-save">Хадгалах</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE='schedule-notes-2026';
+const notes=JSON.parse(localStorage.getItem(STORE)||'{}');
+function persist(){localStorage.setItem(STORE,JSON.stringify(notes));}
+function refresh(){
+  document.querySelectorAll('.cell[data-id]').forEach(cell=>{
+    const id=cell.dataset.id;
+    const old=cell.querySelector('.np');
+    if(old)old.remove();
+    cell.classList.remove('has-note');
+    if(notes[id]){
+      cell.classList.add('has-note');
+      const el=document.createElement('div');
+      el.className='np';el.textContent=notes[id];
+      cell.appendChild(el);
+    }
+  });
+}
+
+let cur=null;
+document.querySelectorAll('.cell[data-id]').forEach(cell=>{
+  cell.addEventListener('click',()=>{
+    cur=cell.dataset.id;
+    document.getElementById('m-title').textContent=cell.dataset.name;
+    const t=cell.dataset.type;
+    document.getElementById('m-meta').innerHTML=
+      `<span class="mtag mday">${cell.dataset.day}</span>
+       <span class="mtag mtime">🕐 ${cell.dataset.time}</span>
+       <span class="mtag ${t==='req'?'tr':'te'}">${t==='req'?'заавал':'сонгон'}</span>`;
+    document.getElementById('m-note').value=notes[cur]||'';
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('m-note').focus(),260);
+  });
+});
+document.getElementById('m-save').onclick=()=>{
+  const v=document.getElementById('m-note').value.trim();
+  if(v)notes[cur]=v;else delete notes[cur];
+  persist();refresh();
+  document.getElementById('overlay').classList.remove('open');
+};
+document.getElementById('m-clear').onclick=()=>{
+  document.getElementById('m-note').value='';
+  delete notes[cur];persist();refresh();
+  document.getElementById('overlay').classList.remove('open');
+};
+document.getElementById('m-close').onclick=()=>document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')document.getElementById('overlay').classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('overlay').classList.remove('open');});
+
+// PWA
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+if(isIOS&&!isStandalone&&!localStorage.getItem('ios-hint-dismissed')){
+  document.getElementById('ios-hint').classList.add('show');
+}
+document.getElementById('ih-close').onclick=()=>{
+  document.getElementById('ios-hint').classList.remove('show');
+  localStorage.setItem('ios-hint-dismissed','1');
+};
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  if(!localStorage.getItem('install-dismissed'))document.getElementById('install-banner').classList.add('show');
+});
+document.getElementById('ib-install').onclick=async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById('install-banner').classList.remove('show');
+};
+document.getElementById('ib-close').onclick=()=>{
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('install-dismissed','1');
+};
+
+refresh();
+</script>
+</body>
+</html>
