@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Хуваарь">
+<meta name="theme-color" content="#1a0a4a">
+<link rel="manifest" href="manifest.json">
+<title>Хуваарь 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700&family=DM+Serif+Display&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ══ CSS VARS (overridden by themes) ══ */
+:root{
+  --bg1:#1a0a4a;--bg2:#0d1a3a;
+  --card:rgba(255,255,255,.08);--card2:rgba(255,255,255,.12);
+  --border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.22);
+  --p:#a78bfa;--p2:#7c3aed;--g:#34d399;--o:#fb923c;--r:#f87171;
+  --text:#f0eeff;--muted:rgba(240,238,255,.55);--muted2:rgba(240,238,255,.3);
+  --sh:0 2px 16px rgba(0,0,0,.25);--sh2:0 6px 28px rgba(0,0,0,.4);
+  --orb1:#7c3aed;--orb2:#0ea5e9;--orb3:#10b981;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bot:env(safe-area-inset-bottom,0px);
+}
+/* Light theme */
+body.theme-light{
+  --bg1:#f0eeff;--bg2:#e4e0ff;
+  --card:rgba(255,255,255,.72);--card2:rgba(255,255,255,.9);
+  --border:rgba(80,50,200,.14);--border2:rgba(80,50,200,.28);
+  --p:#3d22b0;--p2:#5538cc;--g:#126e50;--o:#c85a0a;--r:#b81c38;
+  --text:#0c0a22;--muted:#5a5870;--muted2:#a8a6c0;
+  --orb1:rgba(124,58,237,.18);--orb2:rgba(14,165,233,.14);--orb3:rgba(16,185,129,.12);
+}
+/* Sakura theme */
+body.theme-sakura{
+  --bg1:#2d0a1e;--bg2:#1a0d2e;
+  --card:rgba(255,210,230,.07);--card2:rgba(255,210,230,.12);
+  --border:rgba(255,150,180,.15);--border2:rgba(255,150,180,.3);
+  --p:#f472b6;--p2:#db2777;--g:#34d399;--o:#fb923c;--r:#f87171;
+  --text:#ffe4f0;--muted:rgba(255,228,240,.55);--muted2:rgba(255,228,240,.3);
+  --orb1:#db2777;--orb2:#7c3aed;--orb3:#f59e0b;
+}
+/* Ocean theme */
+body.theme-ocean{
+  --bg1:#020f20;--bg2:#041830;
+  --card:rgba(14,165,233,.08);--card2:rgba(14,165,233,.14);
+  --border:rgba(14,165,233,.18);--border2:rgba(14,165,233,.32);
+  --p:#38bdf8;--p2:#0ea5e9;--g:#34d399;--o:#fb923c;--r:#f87171;
+  --text:#e0f4ff;--muted:rgba(224,244,255,.55);--muted2:rgba(224,244,255,.3);
+  --orb1:#0ea5e9;--orb2:#6366f1;--orb3:#10b981;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{color:var(–text);font-family:‘Noto Sans JP’,sans-serif;overflow:hidden;position:fixed;inset:0;transition:background .5s;}
+
+/* ══ ANIMATED BACKGROUND ══ */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.bg-gradient{position:absolute;inset:0;background:linear-gradient(160deg,var(–bg1) 0%,var(–bg2) 100%);transition:background .5s;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbf linear infinite;pointer-events:none;opacity:.7;}
+.o1{width:420px;height:420px;background:var(–orb1);top:-80px;left:-80px;animation-duration:22s;}
+.o2{width:360px;height:360px;background:var(–orb2);bottom:-60px;right:-60px;animation-duration:28s;animation-delay:-12s;}
+.o3{width:260px;height:260px;background:var(–orb3);top:40%;left:38%;animation-duration:34s;animation-delay:-8s;}
+@keyframes orbf{
+0%{transform:translate(0,0) scale(1);}
+25%{transform:translate(30px,-20px) scale(1.04);}
+50%{transform:translate(-15px,40px) scale(.96);}
+75%{transform:translate(50px,15px) scale(1.06);}
+100%{transform:translate(0,0) scale(1);}
+}
+.gridlines{position:absolute;inset:0;
+background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+background-size:52px 52px;animation:gpan 60s linear infinite;}
+body.theme-light .gridlines{background-image:linear-gradient(rgba(80,50,200,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(80,50,200,.04) 1px,transparent 1px);}
+@keyframes gpan{from{background-position:0 0}to{background-position:52px 52px}}
+
+/* ══ APP SHELL ══ */
+.app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1;}
+.content{flex:1;overflow:hidden;position:relative;}
+.page{display:none;position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+-webkit-overflow-scrolling:touch;padding-bottom:calc(62px + var(–safe-bot));
+animation:pgIn .24s ease both;}
+.page.active{display:block;}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ TOPBAR ══ */
+.topbar{padding:calc(var(–safe-top) + 10px) 14px 10px;display:flex;align-items:center;
+justify-content:space-between;background:rgba(0,0,0,.18);backdrop-filter:blur(24px);
+border-bottom:1px solid var(–border);flex-shrink:0;z-index:10;}
+body.theme-light .topbar{background:rgba(240,238,255,.85);}
+.tb-title{font-family:‘DM Serif Display’,serif;font-size:1.05rem;color:var(–p);}
+.tb-sub{font-family:‘Space Mono’,monospace;font-size:.52rem;color:var(–muted);margin-top:1px;letter-spacing:.08em;}
+.tb-right{display:flex;align-items:center;gap:7px;}
+.clock{font-family:‘Space Mono’,monospace;font-size:.78rem;font-weight:700;color:var(–p);
+background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.25);border-radius:18px;padding:4px 10px;}
+body.theme-light .clock{background:rgba(61,34,176,.08);border-color:rgba(61,34,176,.2);}
+
+/* ══ NAV ══ */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:10;
+padding:7px 6px calc(7px + var(–safe-bot));
+background:rgba(0,0,0,.22);backdrop-filter:blur(24px);
+border-top:1px solid var(–border);display:flex;justify-content:space-around;}
+body.theme-light .nav{background:rgba(240,238,255,.88);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;
+color:var(–muted);cursor:pointer;padding:5px 10px;border-radius:10px;transition:all .2s;min-width:56px;}
+.nav-btn.active{color:var(–p);background:rgba(167,139,250,.14);}
+body.theme-light .nav-btn.active{background:rgba(61,34,176,.08);}
+.nav-btn .ni{font-size:1.2rem;}
+.nav-btn .nl{font-family:‘Space Mono’,monospace;font-size:.45rem;letter-spacing:.03em;}
+
+/* ══ CARDS ══ */
+.glass{background:var(–card);border:1px solid var(–border);border-radius:14px;backdrop-filter:blur(16px);box-shadow:var(–sh);}
+.glass2{background:var(–card2);border:1px solid var(–border2);border-radius:14px;backdrop-filter:blur(16px);box-shadow:var(–sh2);}
+
+/* ══ SCHEDULE — FIXED SIZE NO SCROLL ══ */
+.sch-page{padding:10px 12px 0;display:flex;flex-direction:column;height:100%;}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.li{display:flex;align-items:center;gap:4px;font-size:.6rem;color:var(–muted);font-family:‘Space Mono’,monospace;}
+.ld{width:6px;height:6px;border-radius:50%;}
+.ld-p{background:var(–p);}.ld-g{background:var(–g);}.ld-e{background:var(–muted2);}.ld-o{background:var(–o);}
+
+/* The key: fixed-layout grid that fills available space */
+.sgrid-wrap{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;}
+.sgrid-header{display:grid;grid-template-columns:36px repeat(5,1fr);gap:4px;}
+.sgrid-row{display:grid;grid-template-columns:36px repeat(5,1fr);gap:4px;flex:1;min-height:0;}
+
+.dh{background:var(–card);border:1px solid var(–border);border-radius:8px;
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:5px 2px;backdrop-filter:blur(12px);}
+.dh-n{font-family:‘DM Serif Display’,serif;font-size:.72rem;color:var(–text);}
+.dh-s{font-family:‘Space Mono’,monospace;font-size:.42rem;color:var(–muted);letter-spacing:.08em;}
+
+.ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.ph-n{font-family:‘Space Mono’,monospace;font-size:.65rem;color:var(–muted);font-weight:700;}
+.ph-t{font-family:‘Space Mono’,monospace;font-size:.36rem;color:var(–muted2);text-align:center;line-height:1.5;}
+
+.cell{background:var(–card);border:1px solid var(–border);border-radius:8px;
+display:flex;flex-direction:column;justify-content:space-between;
+padding:6px 6px 5px;position:relative;cursor:pointer;backdrop-filter:blur(12px);
+transition:transform .17s cubic-bezier(.34,1.56,.64,1),box-shadow .17s,border-color .17s;
+overflow:hidden;}
+.cell:hover{transform:translateY(-2px) scale(1.01);box-shadow:var(–sh2);}
+.cell:active{transform:scale(.95);}
+.cell.req{border-color:rgba(167,139,250,.28);}
+.cell.req:hover{border-color:var(–p);box-shadow:0 6px 20px rgba(167,139,250,.25);}
+.cell.ele{border-color:rgba(52,211,153,.22);}
+.cell.ele:hover{border-color:var(–g);box-shadow:0 6px 20px rgba(52,211,153,.2);}
+.cell.emp{opacity:.2;cursor:default;pointer-events:none;background:rgba(255,255,255,.03);}
+.cell.has-note::after{content:‘✎’;position:absolute;top:4px;right:4px;font-size:.56rem;color:var(–o);}
+.cn{font-size:.6rem;line-height:1.4;color:var(–text);font-weight:400;}
+.ct{display:inline-block;font-family:‘Space Mono’,monospace;font-size:.45rem;
+padding:1px 5px;border-radius:20px;letter-spacing:.04em;width:fit-content;margin-top:2px;}
+.tr{background:rgba(167,139,250,.16);color:var(–p);border:1px solid rgba(167,139,250,.28);}
+body.theme-light .tr{background:rgba(61,34,176,.08);color:var(–p);border-color:rgba(61,34,176,.18);}
+.te{background:rgba(52,211,153,.14);color:var(–g);border:1px solid rgba(52,211,153,.24);}
+body.theme-light .te{background:rgba(18,110,80,.08);color:var(–g);border-color:rgba(18,110,80,.18);}
+.np{font-size:.5rem;color:var(–o);line-height:1.25;overflow:hidden;text-overflow:ellipsis;
+display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;
+border-top:1px solid rgba(251,146,60,.12);padding-top:2px;margin-top:2px;}
+
+.sch-stats{display:flex;gap:6px;margin-top:8px;margin-bottom:4px;}
+.sstat{flex:1;background:var(–card);border:1px solid var(–border);border-radius:10px;
+padding:7px 8px;text-align:center;backdrop-filter:blur(12px);}
+.sstat-n{font-family:‘DM Serif Display’,serif;font-size:1.2rem;}
+.sstat-l{font-family:‘Space Mono’,monospace;font-size:.48rem;color:var(–muted);margin-top:1px;}
+.sp{color:var(–p);}.sg{color:var(–g);}.sw{color:var(–text);}
+
+/* ══ TODO ══ */
+.todo-page{padding:12px;}
+.sec-title{font-family:‘DM Serif Display’,serif;font-size:1.15rem;color:var(–text);margin-bottom:3px;}
+.sec-sub{font-family:‘Space Mono’,monospace;font-size:.56rem;color:var(–muted);margin-bottom:10px;}
+.prog-wrap{margin-bottom:10px;}
+.prog-row{display:flex;justify-content:space-between;font-family:‘Space Mono’,monospace;font-size:.58rem;color:var(–muted);margin-bottom:4px;}
+.prog-bar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+body.theme-light .prog-bar{background:rgba(0,0,0,.08);}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(–p),var(–g));border-radius:3px;transition:width .4s ease;}
+.todo-stats{display:flex;gap:6px;margin-bottom:10px;}
+.ts{flex:1;background:var(–card);border:1px solid var(–border);border-radius:10px;
+padding:8px 6px;text-align:center;backdrop-filter:blur(12px);}
+.ts-n{font-family:‘DM Serif Display’,serif;font-size:1.1rem;}
+.ts-l{font-family:‘Space Mono’,monospace;font-size:.46rem;color:var(–muted);margin-top:1px;}
+.ts-n.tc{color:var(–text);}.ts-n.ta{color:var(–p);}.ts-n.td{color:var(–g);}
+.todo-filters{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.todo-filters::-webkit-scrollbar{display:none;}
+.tf{flex-shrink:0;font-family:‘Space Mono’,monospace;font-size:.58rem;padding:4px 10px;
+border-radius:18px;border:1px solid var(–border);background:var(–card);
+color:var(–muted);cursor:pointer;transition:all .2s;backdrop-filter:blur(12px);}
+.tf.active{background:var(–p2);border-color:var(–p);color:#fff;}
+body.theme-light .tf.active{background:var(–p);border-color:var(–p);}
+.todo-add-area{background:var(–card);border:1px solid var(–border);border-radius:12px;
+padding:11px;margin-bottom:10px;backdrop-filter:blur(16px);}
+.todo-inp-row{display:flex;gap:7px;margin-bottom:8px;}
+.todo-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid var(–border);border-radius:9px;
+color:var(–text);font-family:‘Noto Sans JP’,sans-serif;font-size:.82rem;padding:8px 11px;
+outline:none;transition:border-color .2s;}
+body.theme-light .todo-inp{background:rgba(61,34,176,.04);}
+.todo-inp:focus{border-color:var(–p);}
+.todo-inp::placeholder{color:var(–muted2);}
+.add-btn{background:var(–p2);border:none;border-radius:9px;color:#fff;padding:8px 14px;
+font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.add-btn:active{transform:scale(.94);}
+.todo-meta-row{display:flex;gap:6px;flex-wrap:wrap;}
+.meta-sel,.meta-date{font-family:‘Space Mono’,monospace;font-size:.58rem;padding:4px 9px;
+border-radius:18px;border:1px solid var(–border);background:rgba(255,255,255,.06);
+color:var(–text);outline:none;cursor:pointer;}
+body.theme-light .meta-sel,body.theme-light .meta-date{background:rgba(61,34,176,.05);color:var(–text);}
+.meta-date{flex:1;min-width:110px;}
+.todo-list{display:flex;flex-direction:column;gap:6px;}
+.todo-item{background:var(–card);border:1px solid var(–border);border-radius:11px;
+padding:10px 12px;backdrop-filter:blur(12px);animation:pgIn .18s ease both;transition:all .2s;}
+.todo-item.done{opacity:.4;}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(–muted);}
+.todo-item.pri-high{border-left:3px solid var(–r);}
+.todo-item.pri-mid{border-left:3px solid var(–o);}
+.todo-item.pri-low{border-left:3px solid var(–g);}
+.ti-top{display:flex;align-items:flex-start;gap:9px;}
+.todo-cb{width:19px;height:19px;border-radius:6px;border:2px solid var(–border);cursor:pointer;
+flex-shrink:0;display:flex;align-items:center;justify-content:center;
+background:rgba(255,255,255,.04);transition:all .2s;margin-top:1px;}
+body.theme-light .todo-cb{background:rgba(0,0,0,.03);}
+.todo-cb.checked{background:var(–g);border-color:var(–g);}
+.todo-cb.checked::after{content:‘✓’;font-size:.68rem;color:#fff;font-weight:700;}
+.todo-text{flex:1;font-size:.82rem;line-height:1.4;color:var(–text);}
+.todo-del{background:none;border:none;color:var(–muted2);cursor:pointer;font-size:.88rem;padding:2px;transition:color .2s;}
+.todo-del:hover{color:var(–r);}
+.ti-meta{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;padding-left:28px;}
+.ti-tag{font-family:‘Space Mono’,monospace;font-size:.5rem;padding:1px 6px;border-radius:18px;border:1px solid transparent;}
+.tag-hw{background:rgba(167,139,250,.12);color:var(–p);border-color:rgba(167,139,250,.2);}
+body.theme-light .tag-hw{background:rgba(61,34,176,.08);color:var(–p);border-color:rgba(61,34,176,.18);}
+.tag-exam{background:rgba(248,113,113,.1);color:var(–r);border-color:rgba(248,113,113,.2);}
+.tag-personal{background:rgba(52,211,153,.1);color:var(–g);border-color:rgba(52,211,153,.18);}
+.tag-other{background:rgba(255,255,255,.07);color:var(–muted);}
+.tag-high{background:rgba(248,113,113,.1);color:var(–r);}
+.tag-mid{background:rgba(251,146,60,.1);color:var(–o);}
+.tag-low{background:rgba(52,211,153,.1);color:var(–g);}
+.tag-due{background:rgba(255,255,255,.07);color:var(–muted);}
+.tag-due.overdue{background:rgba(248,113,113,.1);color:var(–r);}
+.tag-due.today{background:rgba(251,146,60,.1);color:var(–o);}
+.todo-empty{text-align:center;padding:36px 20px;color:var(–muted2);font-family:‘Space Mono’,monospace;font-size:.66rem;line-height:2.4;}
+
+/* ══ TRAIN ══ */
+.train-page{padding:12px;}
+.dir-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.dir-tab{flex:1;padding:9px 6px;background:var(–card);border:1px solid var(–border);
+border-radius:10px;text-align:center;cursor:pointer;transition:all .2s;
+font-family:‘Space Mono’,monospace;font-size:.62rem;color:var(–muted);backdrop-filter:blur(12px);}
+.dir-tab.active{background:var(–p2);border-color:var(–p);color:#fff;}
+body.theme-light .dir-tab.active{background:var(–p);}
+.next-train{background:linear-gradient(135deg,var(–p2),rgba(124,58,237,.7));border:1px solid var(–p);
+border-radius:13px;padding:14px;margin-bottom:10px;backdrop-filter:blur(16px);}
+.nt-label{font-family:‘Space Mono’,monospace;font-size:.58rem;opacity:.8;letter-spacing:.1em;margin-bottom:5px;}
+.nt-route{font-family:‘DM Serif Display’,serif;font-size:1.15rem;margin-bottom:5px;color:#fff;}
+.nt-time{font-family:‘Space Mono’,monospace;font-size:.95rem;font-weight:700;letter-spacing:.03em;margin-bottom:4px;color:#fff;}
+.nt-cd{font-family:‘Space Mono’,monospace;font-size:.7rem;opacity:.88;color:#fff;}
+.nt-cd span{background:rgba(255,255,255,.18);border-radius:6px;padding:2px 8px;font-weight:700;}
+#train-list{}
+.train-sec-lbl{font-family:‘Space Mono’,monospace;font-size:.56rem;color:var(–muted);
+letter-spacing:.09em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.train-sec-lbl::before,.train-sec-lbl::after{content:’’;flex:1;height:1px;background:var(–border);}
+.train-card{background:var(–card);border:1px solid var(–border);border-radius:10px;
+padding:10px 12px;margin-bottom:5px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px);}
+.train-card.next{border-color:var(–p);}
+.train-card.past{opacity:.3;}
+.tc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.tc-dot.soon{background:var(–g);box-shadow:0 0 6px var(–g);}
+.tc-dot.later{background:var(–muted2);}
+.tc-main{flex:1;}
+.tc-dep{font-family:‘Space Mono’,monospace;font-size:.78rem;font-weight:700;color:var(–text);}
+.tc-arr{font-family:‘Space Mono’,monospace;font-size:.64rem;color:var(–muted);margin-top:1px;}
+.tc-right{text-align:right;flex-shrink:0;}
+.tc-min{font-family:‘Space Mono’,monospace;font-size:.7rem;color:var(–p);font-weight:700;}
+.tc-min.past{color:var(–muted2);}.tc-min.soon{color:var(–g);}
+.tc-sub{font-family:‘Space Mono’,monospace;font-size:.5rem;color:var(–muted2);margin-top:2px;}
+.train-note{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.14);
+border-radius:9px;padding:9px 12px;margin-top:5px;font-size:.65rem;color:var(–muted);line-height:1.7;}
+.train-note strong{color:var(–o);}
+
+/* ══ SETTINGS ══ */
+.settings-page{padding:12px;}
+.settings-section{background:var(–card);border:1px solid var(–border);border-radius:14px;
+overflow:hidden;margin-bottom:12px;backdrop-filter:blur(16px);}
+.settings-header{font-family:‘Space Mono’,monospace;font-size:.6rem;color:var(–muted);
+letter-spacing:.12em;padding:10px 14px 6px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;
+padding:12px 14px;border-top:1px solid var(–border);}
+.settings-row:first-of-type{border-top:none;}
+.sr-left{display:flex;flex-direction:column;gap:2px;}
+.sr-label{font-size:.84rem;color:var(–text);font-weight:600;}
+.sr-sub{font-size:.62rem;color:var(–muted);font-family:‘Space Mono’,monospace;}
+
+/* toggle */
+.toggle{width:44px;height:24px;background:var(–muted2);border-radius:12px;
+cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none;}
+.toggle.on{background:var(–p);}
+.toggle::after{content:’’;position:absolute;top:3px;left:3px;width:18px;height:18px;
+border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle.on::after{transform:translateX(20px);}
+
+/* theme picker */
+.theme-grid{display:flex;gap:8px;padding:12px 14px;flex-wrap:wrap;}
+.theme-opt{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid transparent;
+transition:all .2s;flex:1;min-width:60px;}
+.theme-opt.active{border-color:var(–p);}
+.theme-preview{height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;font-family:‘Space Mono’,monospace;}
+.tp-dark{background:linear-gradient(135deg,#1a0a4a,#0d1a3a);}
+.tp-light{background:linear-gradient(135deg,#f0eeff,#e4e0ff);color:#3d22b0 !important;}
+.tp-sakura{background:linear-gradient(135deg,#2d0a1e,#1a0d2e);}
+.tp-ocean{background:linear-gradient(135deg,#020f20,#041830);}
+.theme-name{font-family:‘Space Mono’,monospace;font-size:.52rem;color:var(–muted);text-align:center;padding:4px 2px;}
+
+/* lang picker */
+.lang-pick{display:flex;gap:6px;padding:12px 14px;}
+.lang-opt{flex:1;padding:8px;background:rgba(255,255,255,.06);border:1px solid var(–border);
+border-radius:9px;text-align:center;cursor:pointer;transition:all .2s;
+font-family:‘Space Mono’,monospace;font-size:.7rem;color:var(–muted);}
+body.theme-light .lang-opt{background:rgba(61,34,176,.04);}
+.lang-opt.active{background:var(–p2);border-color:var(–p);color:#fff;}
+body.theme-light .lang-opt.active{background:var(–p);}
+
+/* pin setting */
+.pin-input-row{display:flex;gap:8px;padding:12px 14px;}
+.pin-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid var(–border);border-radius:9px;
+color:var(–text);font-family:‘Space Mono’,monospace;font-size:.82rem;padding:8px 12px;
+outline:none;letter-spacing:.2em;transition:border-color .2s;}
+body.theme-light .pin-inp{background:rgba(61,34,176,.04);}
+.pin-inp:focus{border-color:var(–p);}
+.save-btn{background:var(–p2);border:none;border-radius:9px;color:#fff;padding:8px 14px;
+font-family:‘Space Mono’,monospace;font-size:.66rem;cursor:pointer;flex-shrink:0;transition:all .2s;}
+body.theme-light .save-btn{background:var(–p);}
+.save-btn:active{transform:scale(.94);}
+.save-feedback{font-family:‘Space Mono’,monospace;font-size:.6rem;color:var(–g);padding:0 14px 10px;display:none;}
+
+/* about card */
+.about-card{background:linear-gradient(135deg,var(–p2),rgba(52,211,153,.4));
+border:1px solid var(–p);border-radius:14px;padding:16px;margin-bottom:12px;
+text-align:center;backdrop-filter:blur(16px);}
+.about-icon{font-size:2rem;margin-bottom:6px;}
+.about-title{font-family:‘DM Serif Display’,serif;font-size:1.1rem;color:#fff;margin-bottom:3px;}
+.about-sub{font-family:‘Space Mono’,monospace;font-size:.58rem;opacity:.8;color:#fff;}
+
+/* ══ MODAL ══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(12px);
+z-index:200;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(–bg1);border:1px solid var(–border);border-radius:20px 20px 0 0;
+padding:16px 18px calc(18px + var(–safe-bot));width:100%;max-width:480px;
+box-shadow:0 -8px 40px rgba(0,0,0,.5);animation:slideUp .22s cubic-bezier(.34,1.2,.64,1) both;position:relative;}
+body.theme-light .modal{background:var(–bg2);}
+.modal::before{content:’’;position:absolute;top:8px;left:50%;transform:translateX(-50%);
+width:30px;height:3px;background:var(–border2);border-radius:2px;}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin:9px 0 9px;gap:8px;}
+.mt{font-family:‘DM Serif Display’,serif;font-size:1rem;color:var(–text);}
+.mc{background:rgba(255,255,255,.08);border:1px solid var(–border);color:var(–muted);
+font-size:.85rem;cursor:pointer;padding:4px 8px;border-radius:7px;flex-shrink:0;}
+body.theme-light .mc{background:rgba(61,34,176,.06);}
+.mm{display:flex;gap:5px;margin-bottom:9px;flex-wrap:wrap;}
+.mtag{font-family:‘Space Mono’,monospace;font-size:.55rem;padding:2px 7px;border-radius:18px;letter-spacing:.05em;}
+.mday{background:rgba(255,255,255,.07);color:var(–muted);border:1px solid var(–border);}
+body.theme-light .mday{background:rgba(0,0,0,.04);}
+.mtime{background:rgba(251,146,60,.1);color:var(–o);border:1px solid rgba(251,146,60,.2);}
+.modal label{display:block;font-family:‘Space Mono’,monospace;font-size:.58rem;color:var(–muted);letter-spacing:.09em;margin-bottom:5px;}
+.modal textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(–border);border-radius:8px;
+color:var(–text);font-family:‘Noto Sans JP’,sans-serif;font-size:.8rem;padding:9px;
+resize:none;height:86px;outline:none;transition:border-color .2s;line-height:1.65;}
+body.theme-light .modal textarea{background:rgba(61,34,176,.04);}
+.modal textarea:focus{border-color:var(–p);}
+.modal textarea::placeholder{color:var(–muted2);}
+.ma{display:flex;gap:7px;margin-top:9px;justify-content:flex-end;}
+.btn{font-family:‘Space Mono’,monospace;font-size:.63rem;padding:7px 13px;border-radius:8px;cursor:pointer;letter-spacing:.04em;border:none;transition:all .2s;}
+.bs{background:var(–p2);color:#fff;}
+body.theme-light .bs{background:var(–p);}
+.bd{background:rgba(255,255,255,.07);color:var(–muted);border:1px solid var(–border);}
+body.theme-light .bd{background:rgba(0,0,0,.04);}
+
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:rgba(167,139,250,.2);border-radius:1px;}
+</style>
+
+</head>
+<body>
+
+<!-- BACKGROUND -->
+
+<div class="bg">
+  <div class="bg-gradient"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="gridlines"></div>
+</div>
+
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="tb-title" id="page-title">Хичээлийн Хуваарь</div>
+      <div class="tb-sub">🌸 2026 · ХАВРЫН СЕМЕСТР</div>
+    </div>
+    <div class="tb-right">
+      <div class="clock" id="clock">00:00</div>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+
+```
+<!-- ══ SCHEDULE ══ -->
+<div class="page active" id="page-schedule">
+  <div class="sch-page">
+    <div class="legend">
+      <div class="li"><div class="ld ld-p"></div><span data-mn="Заавал" data-jp="必修">Заавал</span></div>
+      <div class="li"><div class="ld ld-g"></div><span data-mn="Сонгон" data-jp="選択">Сонгон</span></div>
+      <div class="li"><div class="ld ld-e"></div><span data-mn="Чөлөөт" data-jp="空き">Чөлөөт</span></div>
+      <div class="li"><div class="ld ld-o"></div><span data-mn="Тэмдэглэл" data-jp="メモ">Тэмдэглэл</span></div>
+    </div>
+
+    <div class="sgrid-wrap">
+      <!-- header -->
+      <div class="sgrid-header">
+        <div></div>
+        <div class="dh"><div class="dh-n" data-mn="Да" data-jp="月">Да</div><div class="dh-s">MON</div></div>
+        <div class="dh"><div class="dh-n" data-mn="Мяг" data-jp="火">Мяг</div><div class="dh-s">TUE</div></div>
+        <div class="dh"><div class="dh-n" data-mn="Лха" data-jp="水">Лха</div><div class="dh-s">WED</div></div>
+        <div class="dh"><div class="dh-n" data-mn="Пүр" data-jp="木">Пүр</div><div class="dh-s">THU</div></div>
+        <div class="dh"><div class="dh-n" data-mn="Баа" data-jp="金">Баа</div><div class="dh-s">FRI</div></div>
+      </div>
+      <!-- ① -->
+      <div class="sgrid-row">
+        <div class="ph"><span class="ph-n">①</span><span class="ph-t">9:00<br>10:30</span></div>
+        <div class="cell emp"></div>
+        <div class="cell emp"></div>
+        <div class="cell req" data-id="wed1" data-mn="Англи хэл" data-jp="英語" data-day-mn="Лхагва" data-day-jp="水曜" data-type="req" data-time="9:00–10:30">
+          <div><div class="cn" data-mn="Англи хэл" data-jp="英語">Англи хэл</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell ele" data-id="thu1" data-mn="Японы соёлын тухай" data-jp="日本文化論" data-day-mn="Пүрэв" data-day-jp="木曜" data-type="ele" data-time="9:00–10:30">
+          <div><div class="cn" data-mn="Японы соёлын тухай" data-jp="日本文化論">Японы соёлын тухай</div><span class="ct te" data-mn="сонгон" data-jp="選択">сонгон</span></div>
+        </div>
+        <div class="cell req" data-id="fri1" data-mn="Англи хэл" data-jp="英語" data-day-mn="Баасан" data-day-jp="金曜" data-type="req" data-time="9:00–10:30">
+          <div><div class="cn" data-mn="Англи хэл" data-jp="英語">Англи хэл</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+      </div>
+      <!-- ② -->
+      <div class="sgrid-row">
+        <div class="ph"><span class="ph-n">②</span><span class="ph-t">10:40<br>12:10</span></div>
+        <div class="cell emp"></div>
+        <div class="cell req" data-id="tue2" data-mn="Компьютерийн суурь мэдлэг A④" data-jp="コンピュータ基礎A④" data-day-mn="Мягмар" data-day-jp="火曜" data-type="req" data-time="10:40–12:10">
+          <div><div class="cn" data-mn="Компьютерийн суурь мэдлэг A④" data-jp="コンピュータ基礎A④">Компьютерийн суурь мэдлэг A④</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell ele" data-id="wed2" data-mn="Иргэний хууль + өдөр тутмын амьдрал" data-jp="民法と日常生活" data-day-mn="Лхагва" data-day-jp="水曜" data-type="ele" data-time="10:40–12:10">
+          <div><div class="cn" data-mn="Иргэний хууль + өдөр тутмын амьдрал" data-jp="民法と日常生活">Иргэний хууль + өдөр тутмын амьдрал</div><span class="ct te" data-mn="сонгон" data-jp="選択">сонгон</span></div>
+        </div>
+        <div class="cell req" data-id="thu2" data-mn="Fresher Seminar" data-jp="フレッシャーズゼミ" data-day-mn="Пүрэв" data-day-jp="木曜" data-type="req" data-time="10:40–12:10">
+          <div><div class="cn" data-mn="Fresher Seminar" data-jp="フレッシャーズゼミ">Fresher Seminar</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell ele" data-id="fri2" data-mn="Нийгмийн шинжлэх ухаан" data-jp="社会科学の基礎" data-day-mn="Баасан" data-day-jp="金曜" data-type="ele" data-time="10:40–12:10">
+          <div><div class="cn" data-mn="Нийгмийн шинжлэх ухаан" data-jp="社会科学の基礎">Нийгмийн шинжлэх ухаан</div><span class="ct te" data-mn="сонгон" data-jp="選択">сонгон</span></div>
+        </div>
+      </div>
+      <!-- ③ -->
+      <div class="sgrid-row">
+        <div class="ph"><span class="ph-n">③</span><span class="ph-t">12:50<br>14:20</span></div>
+        <div class="cell req" data-id="mon3" data-mn="Communication" data-jp="コミュニケーション" data-day-mn="Даваа" data-day-jp="月曜" data-type="req" data-time="12:50–14:20">
+          <div><div class="cn" data-mn="Communication" data-jp="コミュニケーション">Communication</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell req" data-id="tue3" data-mn="Японы тухай оршил (гадаад оюутнуудад)" data-jp="日本事情（留学生向け）" data-day-mn="Мягмар" data-day-jp="火曜" data-type="req" data-time="12:50–14:20">
+          <div><div class="cn" data-mn="Японы тухай оршил" data-jp="日本事情（留学生）">Японы тухай оршил</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell req" data-id="wed3" data-mn="Нягтлан бодохын үндэс" data-jp="簿記の基礎" data-day-mn="Лхагва" data-day-jp="水曜" data-type="req" data-time="12:50–14:20">
+          <div><div class="cn" data-mn="Нягтлан бодохын үндэс" data-jp="簿記の基礎">Нягтлан бодохын үндэс</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell emp"></div>
+        <div class="cell req" data-id="fri3" data-mn="Эдийн засгийн үндэс" data-jp="経済学の基礎" data-day-mn="Баасан" data-day-jp="金曜" data-type="req" data-time="12:50–14:20">
+          <div><div class="cn" data-mn="Эдийн засгийн үндэс" data-jp="経済学の基礎">Эдийн засгийн үндэс</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+      </div>
+      <!-- ④ -->
+      <div class="sgrid-row">
+        <div class="ph"><span class="ph-n">④</span><span class="ph-t">14:30<br>16:00</span></div>
+        <div class="cell req" data-id="mon4" data-mn="Japanese Language" data-jp="日本語" data-day-mn="Даваа" data-day-jp="月曜" data-type="req" data-time="14:30–16:00">
+          <div><div class="cn" data-mn="Japanese Language" data-jp="日本語">Japanese Language</div><span class="ct tr" data-mn="заавал" data-jp="必修">заавал</span></div>
+        </div>
+        <div class="cell emp"></div>
+        <div class="cell emp"></div>
+        <div class="cell emp"></div>
+        <div class="cell emp"></div>
+      </div>
+    </div>
+
+    <div class="sch-stats">
+      <div class="sstat"><div class="sstat-n sw">11</div><div class="sstat-l" data-mn="НИЙТ" data-jp="合計">НИЙТ</div></div>
+      <div class="sstat"><div class="sstat-n sp">9</div><div class="sstat-l" data-mn="ЗААВАЛ" data-jp="必修">ЗААВАЛ</div></div>
+      <div class="sstat"><div class="sstat-n sg">2</div><div class="sstat-l" data-mn="СОНГОН" data-jp="選択">СОНГОН</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TODO ══ -->
+<div class="page" id="page-todo">
+  <div class="todo-page">
+    <div class="sec-title" data-mn="📋 Даалгаварын Жагсаалт" data-jp="📋 やることリスト">📋 Даалгаварын Жагсаалт</div>
+    <div class="sec-sub" id="todo-date"></div>
+    <div class="prog-wrap">
+      <div class="prog-row"><span data-mn="Явц" data-jp="進捗">Явц</span><span id="prog-pct">0%</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="todo-stats">
+      <div class="ts"><div class="ts-n tc" id="ts-t">0</div><div class="ts-l" data-mn="Нийт" data-jp="合計">Нийт</div></div>
+      <div class="ts"><div class="ts-n ta" id="ts-a">0</div><div class="ts-l" data-mn="Хийгдэж байгаа" data-jp="未完了">Хийгдэж байгаа</div></div>
+      <div class="ts"><div class="ts-n td" id="ts-d">0</div><div class="ts-l" data-mn="Дууссан" data-jp="完了">Дууссан</div></div>
+    </div>
+    <div class="todo-filters">
+      <div class="tf active" data-filter="all" data-mn="Бүгд" data-jp="すべて">Бүгд</div>
+      <div class="tf" data-filter="active" data-mn="Хийгдэж байгаа" data-jp="未完了">Хийгдэж байгаа</div>
+      <div class="tf" data-filter="done" data-mn="Дууссан" data-jp="完了">Дууссан</div>
+      <div class="tf" data-filter="hw" data-mn="📚 Даалгавар" data-jp="📚 宿題">📚 Даалгавар</div>
+      <div class="tf" data-filter="exam" data-mn="📝 Шалгалт" data-jp="📝 試験">📝 Шалгалт</div>
+      <div class="tf" data-filter="personal" data-mn="⭐ Хувийн" data-jp="⭐ 個人">⭐ Хувийн</div>
+    </div>
+    <div class="todo-add-area">
+      <div class="todo-inp-row">
+        <input class="todo-inp" id="todo-inp" placeholder="Даалгавар нэмэх..." maxlength="100">
+        <button class="add-btn" id="todo-add">＋</button>
+      </div>
+      <div class="todo-meta-row">
+        <select class="meta-sel" id="todo-cat">
+          <option value="hw">📚 Даалгавар</option>
+          <option value="exam">📝 Шалгалт</option>
+          <option value="personal">⭐ Хувийн</option>
+          <option value="other">📌 Бусад</option>
+        </select>
+        <select class="meta-sel" id="todo-pri">
+          <option value="high">🔴 Яаралтай</option>
+          <option value="mid" selected>🟡 Дунд</option>
+          <option value="low">🟢 Тийм ч биш</option>
+        </select>
+        <input class="meta-date" id="todo-due" type="date">
+      </div>
+    </div>
+    <div class="todo-list" id="todo-list">
+      <div class="todo-empty" id="todo-empty">
+        <div style="font-size:2rem;margin-bottom:6px">✨</div>
+        <span data-mn="Одоогоор даалгавар байхгүй" data-jp="タスクがありません">Одоогоор даалгавар байхгүй</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRAIN ══ -->
+<div class="page" id="page-train">
+  <div class="train-page">
+    <div class="sec-title" data-mn="🚆 Галт Тэрэгний Цаг" data-jp="🚆 電車の時刻">🚆 Галт Тэрэгний Цаг</div>
+    <div class="dir-tabs">
+      <div class="dir-tab active" id="tab-to" onclick="setDir('to')" data-mn="→ Шиммачи (сургууль)" data-jp="→ 新町（学校へ）">→ Шиммачи (сургууль)</div>
+      <div class="dir-tab" id="tab-from" onclick="setDir('from')" data-mn="← Такасаки (гэр)" data-jp="← 高崎（帰り）">← Такасаки (гэр)</div>
+    </div>
+    <div class="next-train">
+      <div class="nt-label" data-mn="ДАРААГИЙН ГАЛТ ТЭРЭГ" data-jp="次の電車">ДАРААГИЙН ГАЛТ ТЭРЭГ</div>
+      <div class="nt-route" id="nt-route">—</div>
+      <div class="nt-time" id="nt-time">—</div>
+      <div class="nt-cd" id="nt-cd"></div>
+    </div>
+    <div id="train-list"></div>
+    <div class="train-note">⚠️ <strong data-mn="Анхаарал:" data-jp="注意:">Анхаарал:</strong> <span data-mn="Цагийн хуваарь ойролцоо тооцоолсон (JR 高崎線)." data-jp="時刻は参考値です（JR高崎線）。">Цагийн хуваарь ойролцоо тооцоолсон.</span></div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="page" id="page-settings">
+  <div class="settings-page">
+    <div class="about-card">
+      <div class="about-icon">🎓</div>
+      <div class="about-title">Оюутны Апп</div>
+      <div class="about-sub">2026 · Хаврын Семестр · Жөбу их сургууль</div>
+    </div>
+
+    <!-- THEME -->
+    <div class="settings-section">
+      <div class="settings-header" data-mn="🎨 THEME / ГОЁ ДЭВСГЭР" data-jp="🎨 テーマ">🎨 THEME / ГОЁ ДЭВСГЭР</div>
+      <div class="theme-grid">
+        <div class="theme-opt active" data-theme="dark" onclick="setTheme('dark')">
+          <div class="theme-preview tp-dark">✦ Dark</div>
+          <div class="theme-name" data-mn="Харанхуй" data-jp="ダーク">Харанхуй</div>
+        </div>
+        <div class="theme-opt" data-theme="light" onclick="setTheme('light')">
+          <div class="theme-preview tp-light">☀ Light</div>
+          <div class="theme-name" data-mn="Гэгээлэг" data-jp="ライト">Гэгээлэг</div>
+        </div>
+        <div class="theme-opt" data-theme="sakura" onclick="setTheme('sakura')">
+          <div class="theme-preview tp-sakura">🌸 Sakura</div>
+          <div class="theme-name" data-mn="Сакура" data-jp="さくら">Сакура</div>
+        </div>
+        <div class="theme-opt" data-theme="ocean" onclick="setTheme('ocean')">
+          <div class="theme-preview tp-ocean">🌊 Ocean</div>
+          <div class="theme-name" data-mn="Далай" data-jp="オーシャン">Далай</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANGUAGE -->
+    <div class="settings-section">
+      <div class="settings-header" data-mn="🌐 ХЭЛ / LANGUAGE" data-jp="🌐 言語">🌐 ХЭЛ / LANGUAGE</div>
+      <div class="lang-pick">
+        <div class="lang-opt active" id="lo-mn" onclick="setLang('mn')">🇲🇳 Монгол</div>
+        <div class="lang-opt" id="lo-jp" onclick="setLang('jp')">🇯🇵 日本語</div>
+      </div>
+    </div>
+
+    <!-- DISPLAY -->
+    <div class="settings-section">
+      <div class="settings-header" data-mn="⚙️ ТОХИРГОО" data-jp="⚙️ 設定">⚙️ ТОХИРГОО</div>
+      <div class="settings-row">
+        <div class="sr-left">
+          <div class="sr-label" data-mn="Хөдөлдөг дэвсгэр" data-jp="アニメーション背景">Хөдөлдөг дэвсгэр</div>
+          <div class="sr-sub" data-mn="Orb animation идэвхтэй/идэвхгүй" data-jp="Orbアニメーションのオン/オフ">Orb animation идэвхтэй/идэвхгүй</div>
+        </div>
+        <button class="toggle on" id="tog-anim" onclick="toggleAnim()"></button>
+      </div>
+      <div class="settings-row">
+        <div class="sr-left">
+          <div class="sr-label" data-mn="Grid шугамууд" data-jp="グリッドライン">Grid шугамууд</div>
+          <div class="sr-sub" data-mn="Арын торлог шугам" data-jp="背景グリッドのオン/オフ">Арын торлог шугам</div>
+        </div>
+        <button class="toggle on" id="tog-grid" onclick="toggleGrid()"></button>
+      </div>
+    </div>
+
+    <!-- DATA -->
+    <div class="settings-section">
+      <div class="settings-header" data-mn="🗑️ ӨГӨГДӨЛ" data-jp="🗑️ データ">🗑️ ӨГӨГДӨЛ</div>
+      <div class="settings-row">
+        <div class="sr-left">
+          <div class="sr-label" data-mn="Бүх тэмдэглэл устгах" data-jp="メモを全削除">Бүх тэмдэглэл устгах</div>
+          <div class="sr-sub" data-mn="Хичээлийн тэмдэглэлүүдийг устгана" data-jp="授業メモをすべて削除">Хичээлийн тэмдэглэлүүдийг устгана</div>
+        </div>
+        <button class="save-btn" onclick="clearNotes()" style="background:var(--r)" data-mn="Устгах" data-jp="削除">Устгах</button>
+      </div>
+      <div class="settings-row">
+        <div class="sr-left">
+          <div class="sr-label" data-mn="Бүх даалгавар устгах" data-jp="タスクを全削除">Бүх даалгавар устгах</div>
+          <div class="sr-sub" data-mn="To-do жагсаалтыг цэвэрлэнэ" data-jp="To-Doリストをクリア">To-do жагсаалтыг цэвэрлэнэ</div>
+        </div>
+        <button class="save-btn" onclick="clearTodos()" style="background:var(--r)" data-mn="Устгах" data-jp="削除">Устгах</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
+  </div><!-- /content -->
+
+  <!-- NAV -->
+
+  <div class="nav">
+    <button class="nav-btn active" id="nav-schedule" onclick="goPage('schedule')">
+      <span class="ni">📅</span><span class="nl" data-mn="Хуваарь" data-jp="時間割">Хуваарь</span>
+    </button>
+    <button class="nav-btn" id="nav-todo" onclick="goPage('todo')">
+      <span class="ni">✅</span><span class="nl" data-mn="Даалгавар" data-jp="タスク">Даалгавар</span>
+    </button>
+    <button class="nav-btn" id="nav-train" onclick="goPage('train')">
+      <span class="ni">🚆</span><span class="nl" data-mn="Галт тэрэг" data-jp="電車">Галт тэрэг</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="goPage('settings')">
+      <span class="ni">⚙️</span><span class="nl" data-mn="Тохиргоо" data-jp="設定">Тохиргоо</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL -->
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="mh">
+      <div class="mt" id="m-title"></div>
+      <button class="mc" id="m-close">✕</button>
+    </div>
+    <div class="mm" id="m-meta"></div>
+    <label data-mn="✎ ТЭМДЭГЛЭЛ" data-jp="✎ メモ">✎ ТЭМДЭГЛЭЛ</label>
+    <textarea id="m-note" placeholder="Жишээ нь: 201 анги · Багш Yamamoto..."></textarea>
+    <div class="ma">
+      <button class="btn bd" id="m-clear" data-mn="Устгах" data-jp="削除">Устгах</button>
+      <button class="btn bs" id="m-save" data-mn="Хадгалах" data-jp="保存">Хадгалах</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── TRAIN DATA ──────────────────────────────
+const TRAINS={
+  to:[[5,53,6,12],[6,18,6,37],[6,34,6,53],[6,50,7,9],[7,5,7,24],[7,20,7,40],[7,36,7,55],[7,51,8,10],[8,6,8,25],[8,21,8,40],[8,31,8,50],[8,45,9,4],[9,0,9,19],[9,18,9,37],[9,35,9,54],[9,52,10,11],[10,8,10,27],[10,24,10,43],[10,40,10,59],[10,56,11,15],[11,12,11,31],[11,28,11,47],[11,44,12,3],[12,0,12,19],[12,16,12,35],[12,31,12,50],[12,45,13,4],[13,1,13,20],[13,17,13,36],[13,33,13,52],[13,49,14,8],[14,5,14,24],[14,14,14,33],[14,28,14,47],[14,44,15,3],[15,0,15,19],[15,16,15,35],[15,32,15,51],[15,48,16,7],[16,4,16,23],[16,20,16,39],[16,36,16,55],[16,52,17,11],[17,8,17,27],[17,24,17,43],[17,40,17,59],[17,56,18,15],[18,12,18,31],[18,28,18,47],[18,44,19,3],[19,0,19,19],[19,18,19,37],[19,36,19,55],[19,54,20,13],[20,12,20,31],[20,36,20,55],[21,0,21,19],[21,30,21,49],[22,0,22,19],[22,30,22,49]],
+  from:[[5,32,5,50],[5,58,6,16],[6,20,6,38],[6,42,7,0],[7,0,7,18],[7,16,7,34],[7,32,7,50],[7,48,8,6],[8,4,8,22],[8,20,8,38],[8,36,8,54],[8,52,9,10],[9,8,9,26],[9,24,9,42],[9,40,9,58],[9,56,10,14],[10,12,10,30],[10,28,10,46],[10,38,10,56],[10,55,11,13],[11,8,11,26],[11,24,11,42],[11,40,11,58],[11,56,12,14],[12,12,12,30],[12,20,12,38],[12,36,12,54],[12,52,13,10],[13,8,13,26],[13,24,13,42],[13,40,13,58],[13,56,14,14],[14,12,14,30],[14,28,14,46],[14,48,15,6],[15,4,15,22],[15,20,15,38],[15,36,15,54],[15,52,16,10],[16,9,16,27],[16,25,16,43],[16,41,16,59],[16,57,17,15],[17,13,17,31],[17,29,17,47],[17,45,18,3],[18,1,18,19],[18,17,18,35],[18,33,18,51],[18,49,19,7],[19,5,19,23],[19,23,19,41],[19,41,19,59],[20,0,20,18],[20,20,20,38],[20,48,21,6],[21,20,21,38],[21,52,22,10],[22,24,22,42],[22,56,23,14]]
+};
+
+// ── STATE ───────────────────────────────────
+const S={
+  lang:localStorage.getItem('lang')||'mn',
+  theme:localStorage.getItem('theme')||'dark',
+  anim:localStorage.getItem('anim')!=='0',
+  grid:localStorage.getItem('grid')!=='0',
+  notes:JSON.parse(localStorage.getItem('notes-2026')||'{}'),
+  todos:JSON.parse(localStorage.getItem('todos-2026')||'[]'),
+  curPage:'schedule', curCell:null, dir:'to', filter:'all',
+};
+
+// ── HELPERS ─────────────────────────────────
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmt=(h,m)=>String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+const nowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes();};
+const todayStr=()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');};
+
+// ── THEME ───────────────────────────────────
+function setTheme(t){
+  S.theme=t; localStorage.setItem('theme',t);
+  document.body.className='theme-'+t;
+  document.querySelectorAll('.theme-opt').forEach(o=>o.classList.toggle('active',o.dataset.theme===t));
+}
+
+function toggleAnim(){
+  S.anim=!S.anim; localStorage.setItem('anim',S.anim?'1':'0');
+  document.getElementById('tog-anim').classList.toggle('on',S.anim);
+  document.querySelectorAll('.orb').forEach(o=>o.style.animationPlayState=S.anim?'running':'paused');
+}
+function toggleGrid(){
+  S.grid=!S.grid; localStorage.setItem('grid',S.grid?'1':'0');
+  document.getElementById('tog-grid').classList.toggle('on',S.grid);
+  document.querySelector('.gridlines').style.display=S.grid?'':'none';
+}
+
+// ── LANG ────────────────────────────────────
+const PT={schedule:{mn:'Хичээлийн Хуваарь',jp:'時間割'},todo:{mn:'Даалгаварын Жагсаалт',jp:'やることリスト'},train:{mn:'Галт Тэрэгний Цаг',jp:'電車の時刻'},settings:{mn:'Тохиргоо',jp:'設定'}};
+function applyLang(){
+  const jp=S.lang==='jp';
+  document.querySelectorAll('[data-mn][data-jp]').forEach(el=>{if(el.children.length===0)el.textContent=jp?el.dataset.jp:el.dataset.mn;});
+  document.getElementById('page-title').textContent=PT[S.curPage][S.lang];
+  document.getElementById('lo-mn').classList.toggle('active',!jp);
+  document.getElementById('lo-jp').classList.toggle('active',jp);
+  renderTodos(); renderTrains();
+}
+function setLang(l){S.lang=l;localStorage.setItem('lang',l);applyLang();}
+
+// ── CLOCK ───────────────────────────────────
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  if(S.curPage==='train') renderTrains();
+}
+tick(); setInterval(tick,30000);
+
+// ── PAGE NAV ────────────────────────────────
+function goPage(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  S.curPage=p;
+  document.getElementById('page-title').textContent=PT[p][S.lang];
+  if(p==='train') renderTrains();
+  if(p==='todo') updateStats();
+}
+
+// ── TRAIN ────────────────────────────────────
+function setDir(d){
+  S.dir=d;
+  document.getElementById('tab-to').classList.toggle('active',d==='to');
+  document.getElementById('tab-from').classList.toggle('active',d==='from');
+  renderTrains();
+}
+function renderTrains(){
+  const jp=S.lang==='jp',now=nowMin(),data=TRAINS[S.dir];
+  const from=S.dir==='to'?'高崎':'新町',to=S.dir==='to'?'新町':'高崎';
+  const wins=data.filter(t=>{const d=t[0]*60+t[1];return d>=now-2&&d<=now+30;});
+  const next=(data.filter(t=>t[0]*60+t[1]>=now-2))[0]||null;
+  const hr=document.getElementById('nt-route'),ht=document.getElementById('nt-time'),hc=document.getElementById('nt-cd');
+  if(next){
+    const diff=next[0]*60+next[1]-now;
+    hr.textContent=from+' → '+to;
+    ht.textContent=fmt(next[0],next[1])+' 発  →  '+fmt(next[2],next[3])+' 着';
+    hc.innerHTML=diff<=0?`<span>${jp?'まもなく発車':'Зоогдох дөхөж байна'}</span>`:`<span>${diff}${jp?'分後':'мин дараа'}</span>`;
+  } else {
+    hr.textContent=jp?'本日の運行終了':'Өнөөдрийн галт тэрэг дууссан';
+    ht.textContent='';hc.innerHTML='';
+  }
+  const list=document.getElementById('train-list');list.innerHTML='';
+  if(!wins.length){
+    list.innerHTML=`<div style="text-align:center;padding:20px;font-family:'Space Mono',monospace;font-size:.68rem;color:var(--muted2)">${jp?'30分以内の電車はありません':'30 минутад галт тэрэг байхгүй'}</div>`;
+    return;
+  }
+  const lbl=document.createElement('div');lbl.className='train-sec-lbl';lbl.textContent=jp?'今後30分の電車':'Дараагийн 30 минутад';list.appendChild(lbl);
+  wins.forEach((t,i)=>{
+    const dep=t[0]*60+t[1],diff=dep-now,isPast=diff<0,isNext=i===0&&!isPast;
+    const c=document.createElement('div');c.className='train-card'+(isNext?' next':'')+(isPast?' past':'');
+    const dot=document.createElement('div');dot.className='tc-dot '+(isPast?'later':isNext?'soon':'later');
+    const m=document.createElement('div');m.className='tc-main';
+    m.innerHTML=`<div class="tc-dep">${fmt(t[0],t[1])} 発 → ${fmt(t[2],t[3])} 着</div><div class="tc-arr">${from}→${to} · 高崎線</div>`;
+    const r=document.createElement('div');r.className='tc-right';
+    r.innerHTML=(isPast?`<div class="tc-min past">${jp?'発車済':'Гарсан'}</div>`:diff===0?`<div class="tc-min soon">${jp?'今すぐ':'Одоо!'}</div>`:`<div class="tc-min${diff<=5?' soon':''}">${diff}${jp?'分':'мин'}</div>`)+`<div class="tc-sub">~19${jp?'分':'мин'}</div>`;
+    c.appendChild(dot);c.appendChild(m);c.appendChild(r);list.appendChild(c);
+  });
+}
+
+// ── NOTES ───────────────────────────────────
+function saveNotes(){localStorage.setItem('notes-2026',JSON.stringify(S.notes));}
+function refreshNotes(){
+  document.querySelectorAll('.cell[data-id]').forEach(cell=>{
+    const id=cell.dataset.id,old=cell.querySelector('.np');if(old)old.remove();
+    cell.classList.remove('has-note');
+    if(S.notes[id]){cell.classList.add('has-note');const el=document.createElement('div');el.className='np';el.textContent=S.notes[id];cell.appendChild(el);}
+  });
+}
+document.querySelectorAll('.cell[data-id]').forEach(cell=>{
+  cell.addEventListener('click',()=>{
+    S.curCell=cell.dataset.id;
+    const jp=S.lang==='jp';
+    document.getElementById('m-title').textContent=jp?cell.dataset.jp:cell.dataset.mn;
+    const t=cell.dataset.type;
+    document.getElementById('m-meta').innerHTML=`<span class="mtag mday">${jp?cell.dataset.dayJp:cell.dataset.dayMn}</span><span class="mtag mtime">🕐 ${cell.dataset.time}</span><span class="mtag ${t==='req'?'tr':'te'}">${t==='req'?(jp?'必修':'заавал'):(jp?'選択':'сонгон')}</span>`;
+    document.getElementById('m-note').value=S.notes[S.curCell]||'';
+    document.getElementById('overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('m-note').focus(),250);
+  });
+});
+document.getElementById('m-save').onclick=()=>{
+  const v=document.getElementById('m-note').value.trim();
+  if(v)S.notes[S.curCell]=v;else delete S.notes[S.curCell];
+  saveNotes();refreshNotes();document.getElementById('overlay').classList.remove('open');
+};
+document.getElementById('m-clear').onclick=()=>{
+  document.getElementById('m-note').value='';delete S.notes[S.curCell];
+  saveNotes();refreshNotes();document.getElementById('overlay').classList.remove('open');
+};
+document.getElementById('m-close').onclick=()=>document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')document.getElementById('overlay').classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('overlay').classList.remove('open');});
+function clearNotes(){if(confirm(S.lang==='jp'?'メモを全て削除しますか？':'Бүх тэмдэглэлийг устгах уу?')){S.notes={};saveNotes();refreshNotes();}}
+
+// ── TODO ────────────────────────────────────
+function saveTodos(){localStorage.setItem('todos-2026',JSON.stringify(S.todos));}
+const CAT={hw:{mn:'📚 Даалгавар',jp:'📚 宿題'},exam:{mn:'📝 Шалгалт',jp:'📝 試験'},personal:{mn:'⭐ Хувийн',jp:'⭐ 個人'},other:{mn:'📌 Бусад',jp:'📌 その他'}};
+const PRI={high:{mn:'🔴 Яаралтай',jp:'🔴 緊急'},mid:{mn:'🟡 Дунд',jp:'🟡 普通'},low:{mn:'🟢 Тийм ч биш',jp:'🟢 低い'}};
+const PO={high:0,mid:1,low:2};
+function fmtDue(d){
+  if(!d)return null;const t=todayStr();
+  if(d<t)return{label:'⚠️ '+d,cls:'overdue'};
+  if(d===t)return{label:'🔔 Өнөөдөр',cls:'today'};
+  return{label:'📅 '+d,cls:''};
+}
+function updateStats(){
+  const tot=S.todos.length,done=S.todos.filter(t=>t.done).length,active=tot-done;
+  document.getElementById('ts-t').textContent=tot;
+  document.getElementById('ts-a').textContent=active;
+  document.getElementById('ts-d').textContent=done;
+  const pct=tot>0?Math.round(done/tot*100):0;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const n=new Date();
+  const days=['Ням','Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба'];
+  const daysJP=['日','月','火','水','木','金','土'];
+  const jp=S.lang==='jp';
+  document.getElementById('todo-date').textContent=jp
+    ?`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日 (${daysJP[n.getDay()]})`
+    :`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')} ${days[n.getDay()]}`;
+}
+function renderTodos(){
+  updateStats();
+  const list=document.getElementById('todo-list');list.querySelectorAll('.todo-item').forEach(e=>e.remove());
+  const jp=S.lang==='jp',f=S.filter;
+  let items=[...S.todos];
+  if(f==='active')items=items.filter(t=>!t.done);
+  else if(f==='done')items=items.filter(t=>t.done);
+  else if(['hw','exam','personal','other'].includes(f))items=items.filter(t=>t.cat===f);
+  items.sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    if((PO[a.pri]||1)!==(PO[b.pri]||1))return(PO[a.pri]||1)-(PO[b.pri]||1);
+    if(a.due&&b.due)return a.due.localeCompare(b.due);
+    if(a.due)return -1;if(b.due)return 1;return 0;
+  });
+  document.getElementById('todo-empty').style.display=items.length?'none':'block';
+  items.forEach(todo=>{
+    const item=document.createElement('div');
+    item.className=`todo-item${todo.done?' done':''} pri-${todo.pri||'mid'}`;
+    const di=fmtDue(todo.due);
+    const cl=CAT[todo.cat]||CAT.other;const pl=PRI[todo.pri]||PRI.mid;
+    item.innerHTML=`<div class="ti-top"><div class="todo-cb${todo.done?' checked':''}" data-id="${todo.id}"></div><div class="todo-text">${esc(todo.text)}</div><button class="todo-del" data-id="${todo.id}">✕</button></div><div class="ti-meta"><span class="ti-tag tag-${todo.cat||'other'}">${jp?cl.jp:cl.mn}</span><span class="ti-tag tag-${todo.pri||'mid'}">${jp?pl.jp:pl.mn}</span>${di?`<span class="ti-tag tag-due ${di.cls}">${di.label}</span>`:''}</div>`;
+    list.appendChild(item);
+  });
+}
+document.getElementById('todo-list').addEventListener('click',e=>{
+  const cb=e.target.closest('.todo-cb'),del=e.target.closest('.todo-del');
+  if(cb){const t=S.todos.find(t=>t.id==cb.dataset.id);if(t){t.done=!t.done;saveTodos();renderTodos();}}
+  if(del){S.todos=S.todos.filter(t=>t.id!=del.dataset.id);saveTodos();renderTodos();}
+});
+function addTodo(){
+  const inp=document.getElementById('todo-inp'),text=inp.value.trim();if(!text)return;
+  S.todos.unshift({id:Date.now(),text,cat:document.getElementById('todo-cat').value,pri:document.getElementById('todo-pri').value,due:document.getElementById('todo-due').value||null,done:false});
+  inp.value='';document.getElementById('todo-due').value='';saveTodos();renderTodos();
+}
+document.getElementById('todo-add').onclick=addTodo;
+document.getElementById('todo-inp').addEventListener('keydown',e=>{if(e.key==='Enter')addTodo();});
+document.querySelectorAll('.tf').forEach(btn=>{
+  btn.addEventListener('click',()=>{document.querySelectorAll('.tf').forEach(b=>b.classList.remove('active'));btn.classList.add('active');S.filter=btn.dataset.filter;renderTodos();});
+});
+function clearTodos(){if(confirm(S.lang==='jp'?'タスクを全て削除しますか？':'Бүх даалгаврыг устгах уу?')){S.todos=[];saveTodos();renderTodos();}}
+
+// ── INIT ────────────────────────────────────
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+setTheme(S.theme);
+if(!S.anim){document.querySelectorAll('.orb').forEach(o=>o.style.animationPlayState='paused');document.getElementById('tog-anim').classList.remove('on');}
+if(!S.grid){document.querySelector('.gridlines').style.display='none';document.getElementById('tog-grid').classList.remove('on');}
+document.getElementById('todo-due').min=todayStr();
+refreshNotes();renderTodos();applyLang();
+</script>
+
+</body>
+</html>
